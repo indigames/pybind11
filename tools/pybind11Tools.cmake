@@ -109,20 +109,24 @@ function(_pybind11_add_lto_flags target_name prefer_thin_lto)
 endfunction()
 
 # Build a Python extension module:
-# pybind11_add_module(<name> [MODULE | SHARED] [EXCLUDE_FROM_ALL]
+# pybind11_add_module(<name> [MODULE | STATIC | SHARED] [EXCLUDE_FROM_ALL] # [IGE]
 #                     [NO_EXTRAS] [SYSTEM] [THIN_LTO] source1 [source2 ...])
 #
 function(pybind11_add_module target_name)
-  set(options MODULE SHARED EXCLUDE_FROM_ALL NO_EXTRAS SYSTEM THIN_LTO)
+  set(options MODULE STATIC SHARED EXCLUDE_FROM_ALL NO_EXTRAS SYSTEM THIN_LTO) # [IGE]
   cmake_parse_arguments(ARG "${options}" "" "" ${ARGN})
 
+  # [IGE]: detect static as well
   if(ARG_MODULE AND ARG_SHARED)
     message(FATAL_ERROR "Can't be both MODULE and SHARED")
   elseif(ARG_SHARED)
     set(lib_type SHARED)
-  else()
+  elseif(ARG_MODULE)
     set(lib_type MODULE)
+  else()
+    set(lib_type STATIC)
   endif()
+  # [/IGE]
 
   if(ARG_EXCLUDE_FROM_ALL)
     set(exclude_from_all EXCLUDE_FROM_ALL)
@@ -147,6 +151,7 @@ function(pybind11_add_module target_name)
   endif()
 
   # The prefix and extension are provided by FindPythonLibsNew.cmake
+  if(NOT ARG_STATIC) # [IGE]
   set_target_properties(${target_name} PROPERTIES PREFIX "${PYTHON_MODULE_PREFIX}")
   set_target_properties(${target_name} PROPERTIES SUFFIX "${PYTHON_MODULE_EXTENSION}")
 
@@ -209,6 +214,7 @@ function(pybind11_add_module target_name)
       endif()
     endif()
   endif()
+  endif() # [IGE]
 
   if(MSVC)
     # /MP enables multithreaded builds (relevant when there are many files), /bigobj is
