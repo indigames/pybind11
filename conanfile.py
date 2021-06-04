@@ -18,6 +18,7 @@ class IgeConan(ConanFile):
 
     def package(self):
         self.copy("*")
+        self.run(f'conan upload {self.name}/{self.version}@ige/test --remote ige-center --force --confirm')
 
     def package_id(self):
         self.info.header_only()
