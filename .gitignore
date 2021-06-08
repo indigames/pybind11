@@ -37,3 +37,4 @@ sosize-*.txt
 pybind11Config*.cmake
 pybind11Targets.cmake
 /conanfile.py
+/__pycache__
